@@ -94,8 +94,8 @@
 
     const context = canvas.getContext("2d");
     context.drawImage(video, 0, 0, canvas.width, canvas.height);
-    downloadLink.download = `Screen Shot ${new Date().toLocaleString()}.png`;
-    downloadLink.href = canvas.toDataURL("image/png");
+    downloadLink.download = `Screen Shot ${new Date().toLocaleString()}.jpeg`;
+    downloadLink.href = canvas.toDataURL("image/jpeg");
     downloadLink.click();
   }
 
