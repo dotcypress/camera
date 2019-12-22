@@ -15,6 +15,8 @@
   let deviceId;
   let video;
   let stream;
+  let canvas;
+  let downloadLink;
   let videoDevices;
   let permissionDenied;
   let isFullscreen;
@@ -23,8 +25,7 @@
     try {
       stream = await navigator.mediaDevices.getUserMedia({
         video: {
-          width: { ideal: 4096 },
-          height: { ideal: 2160 }
+          width: { min: 1280 },
         }
       });
     } catch (err) {
@@ -48,8 +49,7 @@
       stream = await navigator.mediaDevices.getUserMedia({
         video: {
           deviceId,
-          width: { ideal: 4096 },
-          height: { ideal: 2160 }
+          width: { min: 1280 },
         }
       });
       cameraSelectorActive = false;
@@ -83,28 +83,20 @@
   function toggleGrid() {
     gridActive = !gridActive;
   }
+
   function goToGithub() {
-    location.href = "https://github.com/dotcypress/camera"
+    location.href = "https://github.com/dotcypress/camera";
   }
 
   async function takePhoto() {
-    if (!stream) {
-      return;
-    }
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
 
-    const track = stream.getVideoTracks()[0];
-    const imageCapture = new ImageCapture(track);
-    const photo = await imageCapture.takePhoto();
-    const url = window.URL.createObjectURL(photo);
-
-    const downloadLink = document.createElement("a");
-    document.body.appendChild(downloadLink);
-    downloadLink.style = "display: none";
-    downloadLink.href = url;
+    const context = canvas.getContext("2d");
+    context.drawImage(video, 0, 0, canvas.width, canvas.height);
     downloadLink.download = `Screen Shot ${new Date().toLocaleString()}.png`;
+    downloadLink.href = canvas.toDataURL("image/png");
     downloadLink.click();
-
-    window.URL.revokeObjectURL(url);
   }
 
   function handleKey(event) {
@@ -192,6 +184,10 @@
     color: orangered;
   }
 
+  #download {
+    display: none;
+  }
+
   .selector-popup {
     position: relative;
   }
@@ -233,7 +229,10 @@
 </style>
 
 <svelte:window on:keyup={handleKey} on:dblclick={toggleFullscreen} />
-<video autoplay playinline bind:this={video} />
+<a id="download" bind:this={downloadLink} href="/">
+  <canvas bind:this={canvas} />
+</a>
+<video autoplay playsinline bind:this={video} />
 {#if permissionDenied}
   <h1>Can't access camera 😫</h1>
 {:else if videoDevices}
