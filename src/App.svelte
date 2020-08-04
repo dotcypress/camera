@@ -22,24 +22,10 @@
   let isFullscreen;
 
   onMount(async () => {
-    try {
-      stream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          width: { min: 1280 },
-        }
-      });
-    } catch (err) {
-      console.log(err);
-      if (err.name !== "AbortError") {
-        permissionDenied = true;
-        return;
-      }
-    }
     const devices = await navigator.mediaDevices.enumerateDevices();
     videoDevices = devices.filter(({ kind }) => kind == "videoinput");
     if (videoDevices[0]) {
-      deviceId = videoDevices[0].deviceId;
-      video.srcObject = stream;
+      switchStream(videoDevices[0].deviceId);
     }
   });
 
@@ -49,7 +35,7 @@
       stream = await navigator.mediaDevices.getUserMedia({
         video: {
           deviceId,
-          width: { min: 1280 },
+          width: { ideal: 1920 }
         }
       });
       cameraSelectorActive = false;
